@@ -1,5 +1,5 @@
 <!--  
-      Este proyecto es un conversor de imágenes
+      Este proyecto es un conversor de imágenes con opciones para convertir, comprimir y redimensionar imágenes.
       Admite los formatos: JPG, PNG, WEBP, AVIF, GIF y BMP
       Todo el procesamiento se realiza en el navegador, sin subir nada a un servidor
       Al poseer pocos conocimientos de Javascript, este proyecto se hizo con Claude, solo con el objetivo de aprender y experimentar.
@@ -23,11 +23,12 @@
   /* ================= PALETA ================= */
   :root{
     color-scheme:light;
-    --bg:#EDEAE6; --surface:#FFFFFF; --surface-2:#F7F4F1; --surface-3:#EDE8E3;
-    --ink:#15120F; --muted:#5F584F; --line:#DAD3CB; --line-soft:#E8E2DB;
-    --signal:#B4141C; --signal-hover:#8E0F16; --signal-soft:#FBEDED; --on-signal:#FFFFFF;
-    --gold:#B07F12; --gold-ink:#8A6410; --gold-bg:#FAF2DE;
-    --warn-bg:#FBEDED; --neutral-bar:#BFB6AC;
+    --bg:#E9ECF1; --surface:#FFFFFF; --surface-2:#F5F7FA; --surface-3:#EAEEF5;
+    --ink:#111620; --muted:#59616F; --line:#D4DAE4; --line-soft:#E4E9F1;
+    --signal:#1D3FCC; --signal-hover:#16309F; --signal-soft:#E7EBFA; --on-signal:#FFFFFF;
+    --gold:#A87A0E; --gold-ink:#7E5A0A; --gold-bg:#FAF3E1;
+    --alert:#B4141C; --alert-bg:#FBEDED;
+    --warn-bg:#FBEDED; --neutral-bar:#B4BCC9;
     --display:'Archivo',system-ui,sans-serif;
     --body:'Inter',system-ui,sans-serif;
     --mono:'JetBrains Mono',ui-monospace,monospace;
@@ -39,6 +40,7 @@
       --ink:#F1ECE4; --muted:#9C948A; --line:#302B25; --line-soft:#221F1B;
       --signal:#E03B3B; --signal-hover:#F45B5B; --signal-soft:#2A1414; --on-signal:#FFFFFF;
       --gold:#E3B44E; --gold-ink:#E3B44E; --gold-bg:#2A2113;
+      --alert:#E03B3B; --alert-bg:#2A1414;
       --warn-bg:#2A1414; --neutral-bar:#3D3830;
     }
   }
@@ -48,6 +50,7 @@
     --ink:#F1ECE4; --muted:#9C948A; --line:#302B25; --line-soft:#221F1B;
     --signal:#E03B3B; --signal-hover:#F45B5B; --signal-soft:#2A1414; --on-signal:#FFFFFF;
     --gold:#E3B44E; --gold-ink:#E3B44E; --gold-bg:#2A2113;
+    --alert:#E03B3B; --alert-bg:#2A1414;
     --warn-bg:#2A1414; --neutral-bar:#3D3830;
   }
 
@@ -70,6 +73,16 @@
     font-family:var(--mono);font-size:11.5px;letter-spacing:0.09em;
     text-transform:uppercase;color:var(--muted);margin-top:3px;
   }
+  .modes{display:flex;border:1px solid var(--signal)}
+  .modes button{
+    font-family:var(--display);font-size:13.5px;font-weight:600;letter-spacing:0.01em;
+    padding:9px 16px;background:var(--surface);border:none;color:var(--muted);cursor:pointer;
+    transition:color .12s,background .12s;
+  }
+  .modes button + button{border-left:1px solid var(--signal)}
+  .modes button:hover{color:var(--signal)}
+  .modes button[aria-pressed="true"]{background:var(--signal);color:var(--on-signal)}
+
   .theme{display:flex;border:1px solid var(--line);background:var(--surface-2)}
   .theme button{
     font-family:var(--mono);font-size:11px;letter-spacing:0.07em;text-transform:uppercase;
@@ -155,6 +168,19 @@
   .subseg button[aria-pressed="true"]{border-color:var(--signal);color:var(--signal);background:var(--signal-soft)}
   .hint{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.45}
 
+  .check{display:flex;align-items:flex-start;gap:9px;margin-top:12px;cursor:pointer}
+  .check input{margin-top:2px;width:16px;height:16px;accent-color:var(--signal);flex:none;cursor:pointer}
+  .check span{font-size:12.5px;color:var(--muted);line-height:1.4}
+  .check strong{color:var(--ink);font-weight:600}
+
+  .unitseg{display:flex;flex:none;border:1px solid var(--line)}
+  .unitseg button{
+    font-family:var(--mono);font-size:11.5px;padding:7px 9px;background:var(--surface);
+    border:none;color:var(--muted);cursor:pointer;
+  }
+  .unitseg button + button{border-left:1px solid var(--line)}
+  .unitseg button[aria-pressed="true"]{background:var(--signal);color:var(--on-signal)}
+
   .run{
     width:100%;font-family:var(--display);font-size:15px;font-weight:600;padding:13px;
     background:var(--signal);border:1px solid var(--signal);color:var(--on-signal);
@@ -178,9 +204,9 @@
     font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:0.1em;
     text-transform:uppercase;padding:2px 7px;flex:none;margin-top:1px;
   }
-  .notice.warn{border-color:var(--signal);background:var(--warn-bg)}
-  .notice.warn .k{background:var(--signal);color:var(--on-signal)}
-  .notice.warn strong{color:var(--signal)}
+  .notice.warn{border-color:var(--alert);background:var(--alert-bg)}
+  .notice.warn .k{background:var(--alert);color:#FFFFFF}
+  .notice.warn strong{color:var(--alert)}
   .notice.info{border-color:var(--gold);background:var(--gold-bg)}
   .notice.info .k{background:var(--gold);color:#1A1409}
   .notice.info strong{color:var(--ink)}
@@ -210,7 +236,7 @@
   .meter-figures .to{font-size:21px;font-weight:700}
   .pct{font-family:var(--mono);font-size:12.5px;font-weight:700;padding:3px 8px}
   .pct.down{color:var(--gold-ink);background:var(--gold-bg)}
-  .pct.up{color:var(--signal);background:var(--warn-bg)}
+  .pct.up{color:var(--alert);background:var(--alert-bg)}
   .track{position:relative;height:14px;background:var(--surface-2);border:1px solid var(--line);margin-top:12px;overflow:hidden}
   .track .hatch{position:absolute;inset:0;opacity:.85;
     background-image:repeating-linear-gradient(135deg,transparent 0 4px,var(--gold) 4px 8px)}
@@ -309,7 +335,9 @@
   }
   .chip.ok{border-color:var(--gold);color:var(--gold-ink);background:var(--gold-bg)}
   .chip.own{border-color:var(--signal);color:var(--signal);background:var(--signal-soft)}
-  .chip.err{border-color:var(--signal);color:var(--on-signal);background:var(--signal)}
+  .chip.err{border-color:var(--alert);color:#FFFFFF;background:var(--alert)}
+  .chip.q{border-color:var(--line);color:var(--muted)}
+  .chip.miss{border-color:var(--alert);color:var(--alert);background:var(--alert-bg)}
 
   /* --- filas de salida --- */
   .out-row{
@@ -351,6 +379,64 @@
   .hist-body{display:none;border-top:1px solid var(--line)}
   .hist-body.on{display:block}
 
+  /* ================= GUÍA ================= */
+  .guide{border:1px solid var(--line);margin-top:16px}
+  .guide-head{
+    display:flex;justify-content:space-between;align-items:center;gap:12px;
+    padding:11px 13px;background:var(--surface-3);cursor:pointer;
+  }
+  .guide-head .n{
+    font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:0.1em;
+    text-transform:uppercase;color:var(--ink);
+  }
+  .guide-head .caret{font-family:var(--mono);font-size:13px;color:var(--muted)}
+  .guide-body{display:none;border-top:1px solid var(--line);padding:18px}
+  .guide-body.on{display:block}
+
+  .guide h4{
+    font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:0.12em;
+    text-transform:uppercase;color:var(--muted);margin:22px 0 10px;
+  }
+  .guide h4:first-child{margin-top:0}
+
+  .qtable{width:100%;border-collapse:collapse;font-size:13px}
+  .qtable th{
+    font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:0.09em;
+    text-transform:uppercase;color:var(--muted);text-align:left;
+    padding:0 10px 8px;border-bottom:1px solid var(--line);
+  }
+  .qtable td{padding:9px 10px;border-bottom:1px solid var(--line-soft);vertical-align:top;line-height:1.45}
+  .qtable tr:last-child td{border-bottom:none}
+  .qtable .r{
+    font-family:var(--mono);font-size:12.5px;font-weight:700;white-space:nowrap;
+  }
+  .qtable .r i{
+    display:inline-block;width:8px;height:8px;margin-right:7px;font-style:normal;
+  }
+  .qtable td.d{color:var(--muted)}
+  .lvl-top i{background:var(--alert)}
+  .lvl-ok i{background:var(--gold)}
+  .lvl-mid i{background:var(--gold);opacity:.55}
+  .lvl-low i{background:var(--alert);opacity:.6}
+
+  .tips{list-style:none;display:grid;gap:9px}
+  .tips li{
+    font-size:13px;color:var(--muted);line-height:1.5;
+    padding-left:16px;position:relative;
+  }
+  .tips li:before{
+    content:"—";position:absolute;left:0;color:var(--signal);font-weight:700;
+  }
+  .tips strong{color:var(--ink);font-weight:600}
+
+  @media (max-width:640px){
+    .qtable, .qtable tbody, .qtable tr, .qtable td{display:block;width:100%}
+    .qtable thead{display:none}
+    .qtable tr{border-bottom:1px solid var(--line);padding:10px 0}
+    .qtable tr:last-child{border-bottom:none}
+    .qtable td{border:none;padding:2px 0}
+  }
+
   /* ================= PIE ================= */
   .foot{
     border-top:1px solid var(--line);padding:16px 22px;background:var(--surface-2);
@@ -380,8 +466,14 @@
   <div class="topbar">
     <div class="brand">
       <h1>Conversor de imágenes</h1>
-      <p>WebP · AVIF · JPEG · PNG</p>
+      <p>Convertir · Comprimir · Redimensionar</p>
     </div>
+    <div class="modes" id="modes" role="group" aria-label="Función">
+      <button data-task="convert"  aria-pressed="true">Convertir</button>
+      <button data-task="compress" aria-pressed="false">Comprimir</button>
+      <button data-task="resize"   aria-pressed="false">Redimensionar</button>
+    </div>
+
     <div class="theme" id="theme" role="group" aria-label="Modo de visualización">
       <button data-t="system" aria-pressed="true">Sistema</button>
       <button data-t="light"  aria-pressed="false">Claro</button>
@@ -400,7 +492,7 @@
         <button id="scopeClear" style="display:none">Volver al lote completo</button>
       </div>
 
-      <div class="group">
+      <div class="group" id="gFormat">
         <span class="label">Formato de salida</span>
         <div class="seg" id="fmt">
           <button data-mime="image/webp" aria-pressed="true">WEBP</button>
@@ -412,21 +504,47 @@
         <p class="hint" id="avifNote" style="display:none"></p>
       </div>
 
-      <div class="group">
+      <div class="group" id="gQuality">
         <div class="slider-head">
           <span class="label" style="margin:0">Calidad</span>
           <span class="val" id="qVal">80</span>
         </div>
         <input type="range" id="q" min="30" max="100" value="80" step="1">
-        <p class="hint" id="qHint">Entre 75 y 85 casi nunca se nota la diferencia.</p>
+        <p class="hint" id="qHint"></p>
+      </div>
+
+      <div class="group" id="gTarget" style="display:none">
+        <span class="label">Peso objetivo</span>
+        <div class="field">
+          <input type="number" id="target" min="10" max="99000" step="10" value="500">
+          <div class="unitseg" id="unit">
+            <button data-u="kb" aria-pressed="true">KB</button>
+            <button data-u="mb" aria-pressed="false">MB</button>
+          </div>
+        </div>
+        <p class="hint" id="targetHint"></p>
+        <label class="check">
+          <input type="checkbox" id="shrink" checked>
+          <span><strong>Reducir dimensiones si hace falta.</strong> Si ni con la calidad mínima
+          se alcanza el peso, la imagen se achica hasta lograrlo.</span>
+        </label>
       </div>
 
       <div class="group">
         <span class="label">Dimensiones</span>
-        <div class="seg three" id="rz">
+        <div class="seg" id="rz">
           <button data-mode="none"  aria-pressed="true">Original</button>
           <button data-mode="max"   aria-pressed="false">Lado mayor</button>
+          <button data-mode="pct"   aria-pressed="false">Porcentaje</button>
           <button data-mode="exact" aria-pressed="false">Exacto</button>
+        </div>
+        <div class="fields" id="pctFields" style="display:none">
+          <div class="field">
+            <label for="pct">Escala</label>
+            <input type="number" id="pct" min="5" max="400" step="5" value="50">
+            <span class="unit">%</span>
+          </div>
+          <p class="hint" id="pctHint"></p>
         </div>
         <div class="fields" id="maxFields" style="display:none">
           <div class="field">
@@ -434,7 +552,12 @@
             <input type="number" id="maxPx" min="16" max="12000" step="1" value="1920">
             <span class="unit">px</span>
           </div>
-          <p class="hint">Mantiene la proporción. Las imágenes más chicas no se agrandan.</p>
+          <p class="hint" id="maxHint"></p>
+          <label class="check">
+            <input type="checkbox" id="upscale">
+            <span><strong>Ampliar las imágenes más chicas.</strong> Sin esto, funciona solo
+            como techo: reduce las grandes y deja intactas las pequeñas.</span>
+          </label>
         </div>
         <div class="fields" id="exactFields" style="display:none">
           <div class="field">
@@ -457,10 +580,7 @@
 
       <div class="group">
         <span class="label">Presets</span>
-        <div class="presets" id="presets">
-          <button data-p="thumb">Miniatura</button>
-          <button data-p="web">Web</button>
-        </div>
+        <div class="presets" id="presets"></div>
       </div>
 
       <div class="group">
@@ -551,6 +671,14 @@
         <div class="hist-body" id="histBody"><div id="histRows"></div></div>
       </div>
 
+      <div class="guide">
+        <div class="guide-head" id="guideHead" role="button" tabindex="0" aria-expanded="false">
+          <span class="n" id="guideTitle">Cómo leer los resultados</span>
+          <span class="caret" id="guideCaret" aria-hidden="true">▸</span>
+        </div>
+        <div class="guide-body" id="guideBody"></div>
+      </div>
+
       <input type="file" id="picker" accept="image/*" multiple hidden>
   <div class="paste-flash" id="pasteFlash">Imagen pegada</div>
 
@@ -583,7 +711,11 @@
   var seq = 0, busy = false, flash = null;
 
   // plantilla: se copia a cada imagen nueva y es lo que se edita en modo lote
-  var tpl = { mime:"image/webp", quality:0.80, mode:"none", max:1920, exW:1200, exH:630, fit:"stretch" };
+  var tpl = { task:"convert", mime:"image/webp", quality:0.80, mode:"none",
+              max:1920, upscale:false, pct:50, exW:1200, exH:630, fit:"stretch",
+              target:500, unit:"kb", shrink:true };
+
+  function targetBytes(c){ return c.target * (c.unit === "mb" ? 1048576 : 1024); }
 
   function clone(c){ return JSON.parse(JSON.stringify(c)); }
   function sameCfg(a,b){ return JSON.stringify(a) === JSON.stringify(b); }
@@ -618,18 +750,29 @@
     if(!e && f.type) e = EXT[f.type] || "";
     return e;
   }
+  var MIME_DE_EXT = { jpg:"image/jpeg", png:"image/png", webp:"image/webp", avif:"image/avif" };
+
+  // en modo Redimensionar cada imagen conserva su formato; si no se puede codificar, cae a PNG
+  function mimeDeOrigen(it){
+    var m = MIME_DE_EXT[srcExt(it.file)] || it.file.type;
+    if(m === "image/avif" && !avifOK) return "image/webp";
+    if(!EXT[m]) return "image/png";
+    return m;
+  }
+
   function canEncode(mime){
     var c = document.createElement("canvas"); c.width = c.height = 1;
     try { return c.toDataURL(mime).indexOf("data:" + mime) === 0; } catch(e){ return false; }
   }
 
-  if(!canEncode("image/avif")){
+  var avifOK = canEncode("image/avif");
+  if(!avifOK){
     var ab = document.querySelector('#fmt button[data-mime="image/avif"]');
     ab.disabled = true;
     ab.title = "Este navegador no puede generar AVIF";
     var an = $("avifNote");
     an.style.display = "block";
-    an.innerHTML = '<strong style="color:var(--signal)">AVIF no disponible.</strong> ' +
+    an.innerHTML = '<strong style="color:var(--alert)">AVIF no disponible.</strong> ' +
       'Este navegador puede mostrar AVIF pero no crearlo. Lo permiten Chrome y Edge 121+, Firefox 133+ ' +
       'y Safari 16.4+ en Mac. Mientras tanto, WebP con calidad 80 da un peso muy parecido y lo abre cualquier equipo.';
   }
@@ -660,6 +803,40 @@
   // vuelca la configuración activa a los controles
   function syncPanel(){
     var c = activeCfg();
+    var comprimir = (c.task === "compress");
+    var redim = (c.task === "resize");
+
+    // interruptor de función
+    Array.prototype.forEach.call($("modes").children, function(b){
+      b.setAttribute("aria-pressed", b.dataset.task === c.task ? "true" : "false");
+    });
+
+    // grupos visibles según la función
+    $("gQuality").style.display = (comprimir || redim) ? "none" : "block";
+    $("gTarget").style.display  = comprimir ? "block" : "none";
+    $("gFormat").style.display  = redim ? "none" : "block";
+
+    // PNG solo tiene sentido al convertir
+    var png = document.querySelector('#fmt button[data-mime="image/png"]');
+    png.disabled = comprimir;
+    png.title = comprimir ? "PNG no permite ajustar la calidad para alcanzar un peso" : "";
+
+    // peso objetivo
+    $("target").value = c.target;
+    $("shrink").checked = c.shrink;
+    Array.prototype.forEach.call($("unit").children, function(b){
+      b.setAttribute("aria-pressed", b.dataset.u === c.unit ? "true" : "false");
+    });
+    $("targetHint").textContent = "Se probarán distintas calidades hasta encontrar la mejor que " +
+      "quepa bajo " + c.target + " " + c.unit.toUpperCase() + ". Cada imagen tarda más que al convertir.";
+
+    pintarGuia();
+
+    // presets de la función activa
+    var grupo = PRESETS[c.task] || {};
+    $("presets").innerHTML = Object.keys(grupo).map(function(k){
+      return '<button data-p="' + k + '">' + grupo[k].etiqueta + '</button>';
+    }).join("");
 
     Array.prototype.forEach.call($("fmt").children, function(b){
       b.setAttribute("aria-pressed", b.dataset.mime === c.mime ? "true" : "false");
@@ -674,7 +851,7 @@
     }[c.mime];
     $("qHint").textContent = lossless
       ? "PNG no usa calidad: comprime sin perder información."
-      : "Entre 75 y 85 casi nunca se nota la diferencia.";
+      : "";
 
     $("q").value = Math.round(c.quality*100);
     $("qVal").textContent = Math.round(c.quality*100);
@@ -683,8 +860,19 @@
       b.setAttribute("aria-pressed", b.dataset.mode === c.mode ? "true" : "false");
     });
     $("maxFields").style.display   = (c.mode === "max")   ? "block" : "none";
+    $("pctFields").style.display   = (c.mode === "pct")   ? "block" : "none";
     $("exactFields").style.display = (c.mode === "exact") ? "block" : "none";
     $("maxPx").value = c.max; $("exW").value = c.exW; $("exH").value = c.exH;
+    $("upscale").checked = !!c.upscale;
+    $("maxHint").textContent = c.upscale
+      ? "Todas las imágenes quedarán con su lado mayor en " + c.max + " px, agrandando las más chicas."
+      : "Mantiene la proporción y actúa como techo: las imágenes más chicas no se agrandan.";
+    $("pct").value = c.pct;
+    $("pctHint").textContent = c.pct === 100
+      ? "Al 100 % no hay cambio de tamaño."
+      : (c.pct < 100
+          ? "Cada imagen quedará al " + c.pct + " % de su tamaño, conservando la proporción."
+          : "Por encima del 100 % la imagen se amplía: no gana detalle y pesa más.");
 
     Array.prototype.forEach.call($("fit").children, function(b){
       b.setAttribute("aria-pressed", b.dataset.fit === c.fit ? "true" : "false");
@@ -712,6 +900,14 @@
     }
   }
 
+  $("modes").addEventListener("click", function(e){
+    var b = e.target.closest("button"); if(!b) return;
+    var t = b.dataset.task;
+    // PNG no sirve para apuntar a un peso: no tiene parámetro de calidad
+    var extra = (t === "compress" && activeCfg().mime === "image/png") ? { mime:"image/webp" } : {};
+    patch(Object.assign({ task:t }, extra));
+  });
+
   $("scopeClear").addEventListener("click", function(){
     items.forEach(function(it){ it.sel = false; });
     syncPanel(); render();
@@ -730,19 +926,41 @@
     var b = e.target.closest("button"); if(b) patch({ mode:b.dataset.mode });
   });
   $("maxPx").addEventListener("input", function(){ patch({ max:Number(this.value) || 0 }); });
+  $("pct").addEventListener("input", function(){ patch({ pct:Math.max(1, Number(this.value) || 1) }); });
+  $("upscale").addEventListener("change", function(){ patch({ upscale:this.checked }); });
   $("exW").addEventListener("input", function(){ patch({ exW:Math.max(1, Number(this.value) || 1) }); });
   $("exH").addEventListener("input", function(){ patch({ exH:Math.max(1, Number(this.value) || 1) }); });
   $("fit").addEventListener("click", function(e){
     var b = e.target.closest("button"); if(b) patch({ fit:b.dataset.fit });
   });
 
+  $("target").addEventListener("input", function(){ patch({ target:Math.max(1, Number(this.value) || 1) }); });
+  $("unit").addEventListener("click", function(e){
+    var b = e.target.closest("button"); if(b) patch({ unit:b.dataset.u });
+  });
+  $("shrink").addEventListener("change", function(){ patch({ shrink:this.checked }); });
+
   var PRESETS = {
-    thumb:{ mime:"image/webp", quality:0.80, mode:"exact", exW:400, exH:400, fit:"cover" },
-    web:  { mime:"image/webp", quality:0.82, mode:"max",   max:1920 }
+    convert:{
+      thumb:{ etiqueta:"Miniatura", cfg:{ mime:"image/webp", quality:0.80, mode:"exact", exW:400, exH:400, fit:"cover" } },
+      web:  { etiqueta:"Web",       cfg:{ mime:"image/webp", quality:0.82, mode:"max",   max:1920 } }
+    },
+    resize:{
+      r1920:{ etiqueta:"1920 px", cfg:{ mode:"max", max:1920 } },
+      r1280:{ etiqueta:"1280 px", cfg:{ mode:"max", max:1280 } },
+      rmed: { etiqueta:"Mitad",   cfg:{ mode:"pct", pct:50 } }
+    },
+    compress:{
+      p200: { etiqueta:"200 KB", cfg:{ mime:"image/webp", target:200, unit:"kb", shrink:true } },
+      p500: { etiqueta:"500 KB", cfg:{ mime:"image/webp", target:500, unit:"kb", shrink:true } },
+      p1m:  { etiqueta:"1 MB",   cfg:{ mime:"image/jpeg", target:1,   unit:"mb", shrink:true } }
+    }
   };
   $("presets").addEventListener("click", function(e){
     var b = e.target.closest("button"); if(!b) return;
-    var p = PRESETS[b.dataset.p]; if(p) patch(clone(p));
+    var grupo = PRESETS[activeCfg().task] || {};
+    var p = grupo[b.dataset.p];
+    if(p) patch(clone(p.cfg));
   });
 
   /* ================= CARGA ================= */
@@ -939,8 +1157,14 @@
       }
       return { dw:tw, dh:th, sx:0, sy:0, scw:sw, sch:sh };
     }
-    if(c.mode === "max" && c.max && (sw > c.max || sh > c.max)){
-      var k = c.max / Math.max(sw, sh);
+    if(c.mode === "pct"){
+      var f = (c.pct || 100) / 100;
+      return { dw:Math.max(1,Math.round(sw*f)), dh:Math.max(1,Math.round(sh*f)), sx:0, sy:0, scw:sw, sch:sh };
+    }
+    if(c.mode === "max" && c.max){
+      var mayor = Math.max(sw, sh);
+      if(mayor <= c.max && !c.upscale) return { dw:sw, dh:sh, sx:0, sy:0, scw:sw, sch:sh };
+      var k = c.max / mayor;
       return { dw:Math.max(1,Math.round(sw*k)), dh:Math.max(1,Math.round(sh*k)), sx:0, sy:0, scw:sw, sch:sh };
     }
     return { dw:sw, dh:sh, sx:0, sy:0, scw:sw, sch:sh };
@@ -963,37 +1187,97 @@
     }
   }
 
+  function dibujar(src, p, mime, escala){
+    var w = Math.max(1, Math.round(p.dw * escala));
+    var h = Math.max(1, Math.round(p.dh * escala));
+    var cv = document.createElement("canvas");
+    cv.width = w; cv.height = h;
+    var ctx = cv.getContext("2d");
+    if(mime === "image/jpeg"){ ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0,0,w,h); }
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(src, p.sx, p.sy, p.scw, p.sch, 0, 0, w, h);
+    return cv;
+  }
+
   function toBlob(cv, mime, q){
     return new Promise(function(res, rej){
       cv.toBlob(function(b){ b ? res(b) : rej(new Error("encode")); }, mime, q);
     });
   }
 
-  function convertOne(it){
-    var c = it.cfg;
+  // busca la calidad más alta cuyo resultado quepa en el peso pedido
+  function buscarCalidad(cv, mime, limite){
+    var lo = 0.30, hi = 0.95, mejor = null, mejorQ = null, i = 0;
+    return paso();
+    function paso(){
+      if(i++ >= 7) return Promise.resolve({ blob:mejor, q:mejorQ });
+      var medio = (lo + hi) / 2;
+      return toBlob(cv, mime, medio).then(function(b){
+        if(b.size <= limite){ mejor = b; mejorQ = medio; lo = medio; }
+        else { hi = medio; }
+        return paso();
+      });
+    }
+  }
+
+  function guardar(it, blob, w, h, c, extra){
+    var m = extra.mime || c.mime;
+    it.out = {
+      blob:blob, size:blob.size, w:w, h:h, mime:m,
+      name:baseName(it.file.name) + "." + EXT[m],
+      origSize:it.file.size, thumb:it.thumb,
+      task:c.task, q:extra.q, met:extra.met
+    };
+    it.error = null;
+  }
+
+  function procesar(it){
+    var c = it.cfg, bitmap = null;
+    // Redimensionar conserva el formato de cada imagen y usa calidad alta fija
+    var mimeOut = (c.task === "resize") ? mimeDeOrigen(it) : c.mime;
+    var qOut    = (c.task === "resize") ? 0.92 : c.quality;
+
     return decode(it.file).then(function(src){
+      bitmap = src;
       var sw = src.width || src.naturalWidth;
       var sh = src.height || src.naturalHeight;
       var p = plan(sw, sh, c);
 
-      var cv = document.createElement("canvas");
-      cv.width = p.dw; cv.height = p.dh;
-      var ctx = cv.getContext("2d");
-      if(c.mime === "image/jpeg"){ ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0,0,p.dw,p.dh); }
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = "high";
-      ctx.drawImage(src, p.sx, p.sy, p.scw, p.sch, 0, 0, p.dw, p.dh);
-      if(src.close) src.close();
+      // ---- convertir: una sola codificación ----
+      if(c.task !== "compress"){
+        var cv = dibujar(src, p, mimeOut, 1);
+        var q = (mimeOut === "image/png") ? undefined : qOut;
+        return toBlob(cv, mimeOut, q).then(function(blob){
+          guardar(it, blob, cv.width, cv.height, c, { q:qOut, met:true, mime:mimeOut });
+        });
+      }
 
-      return toBlob(cv, c.mime, c.mime === "image/png" ? undefined : c.quality).then(function(blob){
-        it.out = {
-          blob:blob, size:blob.size, w:p.dw, h:p.dh, mime:c.mime,
-          name:baseName(it.file.name) + "." + EXT[c.mime], origSize:it.file.size, thumb:it.thumb
-        };
-        it.error = null;
-      });
+      // ---- comprimir: búsqueda de calidad y, si hace falta, achicar ----
+      var limite = targetBytes(c), intentos = 0;
+
+      return (function ronda(escala){
+        var cv = dibujar(src, p, c.mime, escala);
+        return buscarCalidad(cv, c.mime, limite).then(function(r){
+          if(r.blob){
+            guardar(it, r.blob, cv.width, cv.height, c, { q:r.q, met:true, mime:c.mime });
+            return;
+          }
+          if(c.shrink && intentos < 5){
+            intentos++;
+            return ronda(escala * 0.8);
+          }
+          // no se alcanzó: se entrega lo mejor posible
+          return toBlob(cv, c.mime, 0.30).then(function(b){
+            guardar(it, b, cv.width, cv.height, c, { q:0.30, met:false, mime:c.mime });
+          });
+        });
+      })(1);
+
     }).catch(function(){
-      it.error = "No se pudo convertir"; it.out = null;
+      it.error = "No se pudo procesar"; it.out = null;
+    }).then(function(){
+      if(bitmap && bitmap.close) bitmap.close();
     });
   }
 
@@ -1007,7 +1291,7 @@
     var total = lote.length;
     $("progress").classList.add("on");
     $("pFill").style.width = "0%";
-    $("pLabel").textContent = "Convirtiendo 0 / " + total;
+    $("pLabel").textContent = etiquetaAccion() + " 0 / " + total;
 
     lote.forEach(function(it){ it.out = null; it.error = null; });
     render();
@@ -1020,9 +1304,9 @@
         render();
         return;
       }
-      convertOne(lote[i++]).then(function(){
+      procesar(lote[i++]).then(function(){
         $("pFill").style.width = (i/total*100) + "%";
-        $("pLabel").textContent = "Convirtiendo " + i + " / " + total;
+        $("pLabel").textContent = etiquetaAccion() + " " + i + " / " + total;
         render();
         setTimeout(step, 0);
       });
@@ -1031,6 +1315,13 @@
 
   /* ================= SALIDA, ARCHIVO Y DESCARGAS ================= */
   function outputs(){ return items.filter(function(it){ return it.out; }); }
+
+  var VERBOS = {
+    convert:  { infinitivo:"Convertir",     gerundio:"Convirtiendo" },
+    compress: { infinitivo:"Comprimir",     gerundio:"Comprimiendo" },
+    resize:   { infinitivo:"Redimensionar", gerundio:"Redimensionando" }
+  };
+  function etiquetaAccion(){ return (VERBOS[activeCfg().task] || VERBOS.convert).gerundio; }
 
   function download(blob, name){
     var url = URL.createObjectURL(blob);
@@ -1125,20 +1416,65 @@
     });
 
     var ambito = selected().length ? "de la selección" : "del lote";
+    var comprimir = (c.task === "compress");
+    var redim = (c.task === "resize");
 
-    if(c.mime === "image/jpeg" && alpha > 0){
+    if(redim){
+      var raros = lote.filter(function(it){
+        var e = srcExt(it.file);
+        return !MIME_DE_EXT[e] || (e === "avif" && !avifOK);
+      }).length;
+
+      if(c.mode === "none"){
+        out.push({ t:"warn", k:"Sin efecto", m:
+          "<strong>No hay nada que redimensionar.</strong> Con las dimensiones en " +
+          "<strong>Original</strong> las imágenes se guardarían igual que entraron. " +
+          "Elige Lado mayor, Porcentaje o Exacto." });
+      }
+      if(raros > 0){
+        out.push({ t:"info", k:"Formato", m:
+          "Se conserva el formato de cada imagen, pero " + plural(raros, "archivo no se puede",
+          "archivos no se pueden") + " volver a guardar en su formato original (GIF, BMP o AVIF " +
+          "sin soporte). " + (raros === 1 ? "Ese archivo saldrá" : "Esos archivos saldrán") + " en PNG." });
+      }
+      if(c.mode === "max" && c.upscale){
+        out.push({ t:"warn", k:"Ampliación", m:
+          "<strong>La ampliación está activada.</strong> Las imágenes menores a " + c.max +
+          " px se agrandarán por interpolación: no ganan detalle, solo se ven más borrosas y pesan más." });
+      }
+      if(c.mode === "pct" && c.pct > 100){
+        out.push({ t:"warn", k:"Ampliación", m:
+          "<strong>Estás ampliando al " + c.pct + " %.</strong> Los píxeles nuevos se calculan " +
+          "por interpolación: la imagen no gana detalle, solo se ve más borrosa y pesa más." });
+      }
+    }
+
+    if(comprimir && c.mime === "image/avif"){
+      out.push({ t:"info", k:"Lentitud", m:
+        "<strong>AVIF comprimiendo es lento.</strong> Cada imagen se codifica hasta siete veces " +
+        "para encontrar la calidad justa. Con lotes grandes, WebP entrega un peso parecido en una " +
+        "fracción del tiempo." });
+    }
+    if(comprimir && !c.shrink){
+      out.push({ t:"info", k:"Sin achicar", m:
+        "Con la reducción de dimensiones desactivada, las imágenes que no quepan en " +
+        c.target + " " + c.unit.toUpperCase() + " se entregarán con la calidad mínima y " +
+        "quedarán marcadas como <strong>no alcanzado</strong>." });
+    }
+
+    if(!redim && c.mime === "image/jpeg" && alpha > 0){
       out.push({ t:"warn", k:"Transparencia", m:
         "<strong>JPEG no admite transparencia.</strong> " +
         plural(alpha, "imagen " + ambito + " puede tenerla", "imágenes " + ambito + " pueden tenerla") +
         " y esas zonas saldrán en blanco. Si necesitas conservarla, usa WebP o PNG." });
     }
-    if(c.mime === "image/png" && fromJpg > 0){
+    if(!redim && c.mime === "image/png" && fromJpg > 0){
       out.push({ t:"warn", k:"Peso", m:
         "<strong>PNG comprime sin pérdida.</strong> Convertir " +
         plural(fromJpg, "foto JPEG", "fotos JPEG") +
         " a PNG suele multiplicar el peso varias veces. Solo conviene si necesitas transparencia o vas a seguir editando." });
     }
-    if(same > 0){
+    if(same > 0 && !comprimir && !redim){
       var quien = (same === lote.length)
         ? (lote.length === 1 ? "La imagen ya está" : "Todas las imágenes " + ambito + " ya están")
         : same + " de " + lote.length + " ya están";
@@ -1169,6 +1505,10 @@
     if(it.error)      chips += '<span class="chip err">Error</span>';
     else if(it.out)   chips += '<span class="chip ok">Convertida</span>';
     else              chips += '<span class="chip">Pendiente</span>';
+    if(it.cfg.task === "compress")
+      chips += '<span class="chip q">Comprimir a ' + it.cfg.target + ' ' + it.cfg.unit.toUpperCase() + '</span>';
+    if(it.cfg.task === "resize")
+      chips += '<span class="chip q">Redimensionar</span>';
     if(!sameCfg(it.cfg, tpl)) chips += '<span class="chip own">Ajustes propios</span>';
 
     return '<div class="in-row' + (it.sel ? ' sel' : '') + '" data-id="' + it.id + '">' +
@@ -1184,6 +1524,12 @@
 
   function outRowHTML(o, key){
     var d = Math.round((1 - o.size/o.origSize) * 100);
+    var marcas = "";
+    if(o.task === "resize") marcas += '<span class="chip q">Formato conservado</span>';
+    if(o.task === "compress"){
+      marcas += '<span class="chip q">Calidad ' + Math.round(o.q * 100) + '</span>';
+      if(!o.met) marcas += '<span class="chip miss">Peso no alcanzado</span>';
+    }
     return '<div class="out-row">' +
       (o.thumb ? '<img class="thumb" src="' + o.thumb + '" alt="">' : '<div class="thumb"></div>') +
       '<div class="body">' +
@@ -1193,6 +1539,7 @@
         '</div>' +
         '<div class="info">' + o.w + ' × ' + o.h + ' · ' + EXT[o.mime].toUpperCase() +
           ' · antes ' + fmtBytes(o.origSize) + '</div>' +
+        (marcas ? '<div class="chips">' + marcas + '</div>' : '') +
       '</div>' +
       '<button class="dl" data-dl="' + key + '">Descargar</button>' +
     '</div>';
@@ -1225,9 +1572,10 @@
     // botones del panel
     var lote = scopeItems();
     $("run").disabled = !lote.length || busy;
-    $("run").textContent = busy ? "Convirtiendo…"
-      : (sel.length ? "Convertir selección (" + sel.length + ")"
-                    : (n ? "Convertir todo (" + n + ")" : "Convertir"));
+    var verbo = (VERBOS[activeCfg().task] || VERBOS.convert).infinitivo;
+    $("run").textContent = busy ? etiquetaAccion() + "…"
+      : (sel.length ? verbo + " selección (" + sel.length + ")"
+                    : (n ? verbo + " todo (" + n + ")" : verbo));
     $("remove").disabled = !n || busy;
     $("remove").textContent = sel.length ? "Quitar selección (" + sel.length + ")" : "Quitar todo";
 
@@ -1252,6 +1600,106 @@
       (archived.length === 1 ? " imagen" : " imágenes");
     $("histRows").innerHTML = archived.map(function(o,i){ return outRowHTML(o, "h" + i); }).join("");
   }
+
+  /* ================= GUÍA ================= */
+  function fila(clase, col1, col2, col3){
+    return '<tr class="' + clase + '"><td class="r"><i></i>' + col1 + '</td>' +
+           '<td>' + col2 + '</td><td class="d">' + col3 + '</td></tr>';
+  }
+  function tabla(cab, filas){
+    return '<table class="qtable"><thead><tr>' +
+      '<th style="width:88px">' + cab[0] + '</th>' +
+      '<th style="width:38%">' + cab[1] + '</th><th>' + cab[2] + '</th>' +
+      '</tr></thead><tbody>' + filas.join("") + '</tbody></table>';
+  }
+  function consejos(lista){
+    return '<ul class="tips">' + lista.map(function(t){ return '<li>' + t + '</li>'; }).join("") + '</ul>';
+  }
+
+  var GUIAS = {
+
+    convert: function(){
+      return '<h4>Qué formato elegir</h4>' +
+        tabla(["Formato","Cuándo conviene","A tener en cuenta"], [
+          fila("lvl-ok",  "WEBP", "La opción por defecto para casi todo. Pesa entre un 25 % y un 35 % menos que JPEG con calidad equivalente.", "Lo abren todos los navegadores actuales, pero programas antiguos pueden no reconocerlo."),
+          fila("lvl-ok",  "AVIF", "Cuando el peso importa más que el tiempo. Es el formato más eficiente de los cuatro.", "Codifica lento y no todos los navegadores pueden crearlo."),
+          fila("lvl-mid", "JPEG", "Cuando el archivo va a manos de terceros o a un sistema antiguo. Lo abre absolutamente todo.", "No admite transparencia: esas zonas se rellenan en blanco."),
+          fila("lvl-mid", "PNG",  "Capturas de pantalla, logos, dibujos con colores planos, o cuando necesitas transparencia.", "Comprime sin pérdida: con fotografías el peso se dispara.")
+        ]) +
+        '<h4>Consejos</h4>' +
+        consejos([
+          '<strong>Entre 75 y 85 casi nunca se nota la diferencia.</strong> Es el rango al que conviene apuntar. Subir a 95 multiplica el peso a cambio de detalle que el ojo no distingue en pantalla.',
+          '<strong>Las fotografías y los gráficos se comportan distinto.</strong> Capturas de pantalla, logos y dibujos con colores planos toleran calidades bajas mucho mejor que una foto con texturas.',
+          '<strong>Recomprimir castiga dos veces.</strong> Un JPEG que ya perdió información vuelve a perderla al reprocesarse. Trabaja desde el original cuando lo tengas.',
+          '<strong>Convertir al mismo formato con calidad alta no reduce nada.</strong> Si el aviso dorado te lo señala, baja la calidad o el tamaño; si no, el archivo puede terminar más pesado.',
+          '<strong>Reducir dimensiones pesa más que bajar calidad.</strong> Achicar a la mitad deja una cuarta parte de los píxeles. Para recortes grandes de peso, empieza por ahí.'
+        ]);
+    },
+
+    compress: function(){
+      return '<h4>La calidad que informa cada imagen</h4>' +
+        tabla(["Calidad","Qué significa","Qué conviene hacer"], [
+          fila("lvl-top", "90 – 95", "Llegó al máximo que permite el buscador. El peso objetivo nunca fue una restricción real.", "Puedes exigir bastante menos peso sin que se note. Prueba con la mitad."),
+          fila("lvl-ok",  "75 – 89", "Zona cómoda. La pérdida existe pero es imperceptible en pantalla.", "Nada. Es el rango al que conviene apuntar."),
+          fila("lvl-mid", "60 – 74", "Empieza a notarse en cielos, degradados y bordes de texto.", "Aceptable para web. Si la imagen tiene texto, sube el objetivo."),
+          fila("lvl-low", "45 – 59", "Artefactos visibles: bloques y halos alrededor de los contornos.", "Mejor reducir las dimensiones que seguir bajando la calidad."),
+          fila("lvl-low", "30 – 44", "El mínimo del buscador. Si aparece, el objetivo era muy exigente para ese tamaño.", "Activa la reducción de dimensiones o sube el peso objetivo.")
+        ]) +
+        '<h4>Para exigir más</h4>' +
+        consejos([
+          '<strong>El peso objetivo es un techo, no una meta.</strong> Si el resultado queda muy por debajo, no es un error: a calidad máxima el archivo simplemente pesa eso. Aumentar el peso de una imagen requeriría inventar información que no existe.',
+          '<strong>Reducir dimensiones es el recurso más potente.</strong> Cuando el objetivo es muy exigente, achicar la imagen conserva más nitidez que forzar la calidad al mínimo.',
+          '<strong>WebP y AVIF llegan más lejos que JPEG.</strong> Si el objetivo se resiste, cambiar de formato suele resolverlo sin tocar nada más.',
+          '<strong>AVIF es lento aquí.</strong> Cada imagen se codifica hasta siete veces para encontrar la calidad justa. En lotes grandes se nota mucho.',
+          '<strong>La marca «Peso no alcanzado» es informativa.</strong> El archivo se genera igual, con lo mejor que se pudo lograr dentro de los límites que fijaste.'
+        ]);
+    },
+
+    resize: function(){
+      return '<h4>Los cuatro modos de tamaño</h4>' +
+        tabla(["Modo","Qué hace","Cuándo usarlo"], [
+          fila("lvl-ok",  "Original",   "No toca las dimensiones.", "En este modo no tiene sentido: la imagen saldría igual que entró."),
+          fila("lvl-top", "Lado mayor", "Fija un límite para el lado más largo y calcula el otro solo.", "Lo más habitual. Pon un techo y olvídate: las grandes se achican y las chicas quedan intactas, salvo que actives la ampliación."),
+          fila("lvl-ok",  "Porcentaje", "Escala cada imagen respecto a su propio tamaño.", "Cuando el lote tiene tamaños distintos y quieres reducir todo en la misma proporción."),
+          fila("lvl-mid", "Exacto",     "Fuerza un ancho y un alto concretos.", "Cuando el destino exige medidas fijas: una portada, un banner, una foto de carnet.")
+        ]) +
+        '<h4>Deformar o recortar</h4>' +
+        consejos([
+          '<strong>Deformar</strong> estira la imagen hasta las medidas pedidas sin respetar su proporción. Las caras y los círculos se notan enseguida; los fondos y las texturas lo disimulan.',
+          '<strong>Recortar</strong> llena las medidas conservando la proporción y corta el sobrante desde el centro. Nada se deforma, pero se pierden los bordes.',
+          'Para miniaturas cuadradas, <strong>recortar casi siempre es la mejor opción</strong>.'
+        ]) +
+        '<h4>Consejos</h4>' +
+        consejos([
+          '<strong>Ampliar no crea detalle.</strong> Los píxeles nuevos se calculan interpolando los que ya existen, así que la imagen se ve más borrosa y además pesa más. Es lo peor de ambos mundos, salvo que necesites una medida exacta sí o sí.',
+          '<strong>Este modo conserva el formato de cada imagen</strong> y usa calidad alta fija. Es el indicado para un lote mezclado que solo quieres achicar sin unificarlo todo.',
+          '<strong>GIF y BMP salen en PNG.</strong> El navegador sabe leerlos pero no escribirlos, y PNG es el reemplazo que no pierde información ni transparencia.',
+          '<strong>Reducir el tamaño baja el peso más que cualquier ajuste de calidad.</strong> A la mitad de ancho y alto queda una cuarta parte de los píxeles.'
+        ]);
+    }
+  };
+
+  var TITULOS_GUIA = {
+    convert:  "Cómo elegir formato y calidad",
+    compress: "Cómo leer los resultados",
+    resize:   "Cómo funciona cada modo de tamaño"
+  };
+
+  function pintarGuia(){
+    var t = activeCfg().task;
+    $("guideTitle").textContent = TITULOS_GUIA[t] || TITULOS_GUIA.convert;
+    $("guideBody").innerHTML = (GUIAS[t] || GUIAS.convert)();
+  }
+
+  function toggleGuide(){
+    var abierta = $("guideBody").classList.toggle("on");
+    $("guideCaret").textContent = abierta ? "▾" : "▸";
+    $("guideHead").setAttribute("aria-expanded", abierta ? "true" : "false");
+  }
+  $("guideHead").addEventListener("click", toggleGuide);
+  $("guideHead").addEventListener("keydown", function(e){
+    if(e.key === "Enter" || e.key === " "){ e.preventDefault(); toggleGuide(); }
+  });
 
   /* ================= INICIO ================= */
   syncPanel();
